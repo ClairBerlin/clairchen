@@ -52,7 +52,7 @@
 
 // Program Version, to be printed in debug messages.
 // Increment with each change to the code and commit.
-static const u2_t progVer = 2;
+static const u2_t progVer = 3;
 
 
 //--------------------------------------------------------------------
@@ -167,7 +167,8 @@ void printAddrAndKeys() {
                     Serial.print("-");
             printHex2(nwkKey[i]);
     }
-    Serial.println();            
+    Serial.println();
+    Serial.flush();
 }
 
 void printResumeInfo() {
@@ -220,16 +221,29 @@ void onEvent (ev_t ev) {
             break;
         case EV_TXCOMPLETE:
             Serial.println(F("EV_TXCOMPLETE (includes waiting for RX windows)"));
-            if (LMIC.txrxFlags & TXRX_ACK)
-              Serial.println(F("Received ack"));
-            if (LMIC.dataLen) {
-              Serial.println(F("Received "));
-              Serial.println(LMIC.dataLen);
+            // Any data to be received?
+            if (LMIC.dataLen != 0 || LMIC.dataBeg != 0) {
+              Serial.print(F("  Received downlink message with "));
+              Serial.print(LMIC.dataLen);
               Serial.println(F(" bytes of payload"));
-            }
-            Serial.print("Uplink Sequence Counter: ");
+              Serial.print(F("  RSSI [dBm]: "));
+              Serial.println(LMIC.rssi);
+              Serial.print(F("  SNR [dB]: "));
+              Serial.println(LMIC.snr/4);
+              // Data was received. Extract port number if any.
+              u1_t bPort = 0;
+              if (LMIC.txrxFlags & TXRX_PORT) {
+                 bPort = LMIC.frame[LMIC.dataBeg - 1];
+                 Serial.print(F("  Received message on port "));
+                 Serial.println(bPort);
+                 }
+              if (LMIC.txrxFlags & TXRX_ACK) { Serial.println(F("  Received ack")); }
+              // Call user-supplied function with port #, pMessage, nMessage; // nMessage might be zero.
+              // receiveMessage(bPort, LMIC.frame + LMIC.dataBeg, LMIC.dataLen);
+            } else { Serial.println(F("  Did not receive any downlink message.")); }
+            Serial.print("  Uplink Sequence Counter: ");
             Serial.println(LMIC.seqnoUp, DEC);
-            Serial.print("Downlink Sequence Counter: ");
+            Serial.print("  Downlink Sequence Counter: ");
             Serial.println(LMIC.seqnoDn, DEC);
             // Schedule next transmission
             os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
@@ -276,6 +290,7 @@ void onEvent (ev_t ev) {
             Serial.println((unsigned) ev);
             break;
     }
+    Serial.flush();
 }
 
 void do_send(osjob_t* j){
@@ -323,11 +338,27 @@ void setup() {
       LMIC_setAdrMode(1);
       printResumeInfo();
     #endif
-  
+
+//    LMIC_setClockError(MAX_CLOCK_ERROR * 100 / 100);
+    
+    Serial.flush();
+    
     // Start job (sending automatically starts OTAA too)
     do_send(&sendjob);
 }
 
 void loop() {
+  // Call os_getTime() more often to ensure the os time base is in synch with system time
+  // It's a crude hack described here: https://www.thethingsnetwork.org/forum/t/adr-doesnt-work-915-mhz-band-abp/39244/20?u=ulischuster
+  unsigned long now;
+  now = os_getTime();
+  if ((now & 4096) != 0) {
+    digitalWrite(13, HIGH);
+  }
+  else {
+    digitalWrite(13, LOW);
+  } 
+
+os_runloop_once();
     os_runloop_once();
 }

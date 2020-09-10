@@ -10,4 +10,4 @@
 //#define LMIC_USE_INTERRUPTS
 //#define LMIC_DEBUG_LEVEL 2
 //#define LMIC_PRINTF_TO Serial
-//#define LMIC_ENABLE_arbitrary_clock_error 1
+# define LMIC_ENABLE_arbitrary_clock_error 1
