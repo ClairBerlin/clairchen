@@ -317,14 +317,14 @@ void do_send(osjob_t* j){
         Serial.print(humidity, 1);
 
         clairMessage[0] = 0;
-        clairMessage[0] &= 1 << 5; // protocol version 1 (3 bits)
-        clairMessage[0] &= 1 << 3; // message identifier (2 bits)
-        clairMessage[0] &= 0; // message header (3 bits)
+        clairMessage[0] |= 1 << 5; // protocol version 1 (3 bits)
+        clairMessage[0] |= 1 << 3; // message identifier (2 bits)
+        clairMessage[0] |= 0; // message header (3 bits)
 
         clairMessage[1] = co2ppm / 20;
         clairMessage[2] = 0;
-        clairMessage[2] &= (((uint8_t) temperature) & 0x1F) << 3; // 5 bits
-        clairMessage[2] &= ((uint8_t) humidity / 10) & 0x7; // 3 bits
+        clairMessage[2] |= (((uint8_t) temperature) & 0x1F) << 3; // 5 bits
+        clairMessage[2] |= ((uint8_t) humidity / 10) & 0x7; // 3 bits
 
         LMIC_setTxData2(1, clairMessage, 3, 0);
         Serial.println(F("Packet queued"));
@@ -386,7 +386,6 @@ void loop() {
   else {
     digitalWrite(13, LOW);
   } 
-
-os_runloop_once();
-    os_runloop_once();
+  
+  os_runloop_once();
 }
