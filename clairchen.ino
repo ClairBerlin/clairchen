@@ -44,6 +44,10 @@
 #include <hal/hal.h>
 #include <SPI.h>
 
+#include <Wire.h>
+#include "SparkFun_SCD30_Arduino_Library.h"
+SCD30 airSensor;
+
 // Define to resume an existing session without JOINING the TTN again.
 // Requires DeviceAddr, NwSKey, and AppSKey to be defined below.
 #ifndef CONN_RESUME
@@ -298,8 +302,31 @@ void do_send(osjob_t* j){
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
     } else {
-        // Prepare upstream data transmission at the next possible time.
-        LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
+        uint16_t co2ppm = airSensor.getCO2();
+        float temperature = (uint8_t) airSensor.getTemperature();
+        float humidity = airSensor.getHumidity();
+        uint8_t clairMessage[3];
+
+        Serial.print("co2(ppm):");
+        Serial.print(co2ppm);
+
+        Serial.print(" temp(C):");
+        Serial.print(temperature, 1);
+
+        Serial.print(" humidity(%):");
+        Serial.print(humidity, 1);
+
+        clairMessage[0] = 0;
+        clairMessage[0] &= 1 << 5; // protocol version 1 (3 bits)
+        clairMessage[0] &= 1 << 3; // message identifier (2 bits)
+        clairMessage[0] &= 0; // message header (3 bits)
+
+        clairMessage[1] = co2ppm / 20;
+        clairMessage[2] = 0;
+        clairMessage[2] &= (((uint8_t) temperature) & 0x1F) << 3; // 5 bits
+        clairMessage[2] &= ((uint8_t) humidity / 10) & 0x7; // 3 bits
+
+        LMIC_setTxData2(1, clairMessage, 3, 0);
         Serial.println(F("Packet queued"));
     }
     // Next TX is scheduled after TX_COMPLETE event.
@@ -312,12 +339,13 @@ void setup() {
     Serial.begin(9600);
     Serial.println(F("Starting"));
 
-    #ifdef VCC_ENABLE
-    // For Pinoccio Scout boards
-    pinMode(VCC_ENABLE, OUTPUT);
-    digitalWrite(VCC_ENABLE, HIGH);
-    delay(1000);
-    #endif
+    Wire.begin();
+    if (airSensor.begin() == false)
+    {
+      Serial.println("Air sensor not detected. Please check wiring. Freezing...");
+      while (1)
+        ;
+    }
 
     // LMIC init
     os_init();
