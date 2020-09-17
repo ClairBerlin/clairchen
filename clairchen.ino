@@ -98,7 +98,7 @@ static void measureAndSendIfDue(osjob_t* job) {
     }
     // next measurement will be scheduled on EV_TXCOMPLETE
   } else {
-    scheduleNextMeasurement(-1);
+    scheduleNextMeasurement();
   }
 }
 
