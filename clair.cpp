@@ -17,6 +17,8 @@ static transmission_config_t transmission_configs[] = {
   { .samplingPeriodMinutes = 1, .samplesPerMessage = 2 } // SF7/B
 };
 
+#define NROF_TRANSMISSION_CONFIGS (sizeof(transmission_configs) / sizeof(transmission_configs[0]))
+
 Clair::Clair() {
   numberOfSamplesInBuffer = 0;
 }
@@ -41,6 +43,8 @@ void Clair::addSample() {
 }
 
 bool Clair::isMessageDue(int datarate) {
+  if (datarate < 0 || datarate > NROF_TRANSMISSION_CONFIGS) return false;
+
   currentDatarate = datarate;
   return numberOfSamplesInBuffer >= transmission_configs[datarate].samplesPerMessage;
 }
@@ -64,6 +68,8 @@ static void encodeSample(clair_sample_t sample, uint8_t *messageBuffer) {
 uint8_t Clair::encodeMessage(uint8_t *messageBuffer, uint16_t messageBufferSize) {
   uint8_t messageLength = 1;
   uint8_t *bufferPosition = messageBuffer;
+
+  if (! isMessageDue(currentDatarate)) return 0;
 
   // encode header
   *bufferPosition = 0;
