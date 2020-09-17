@@ -17,12 +17,18 @@ typedef struct {
   float humidity;
 } clair_sample_t;
 
+/**
+ * A Clair object keeps the state of the transmission adaptation algorithm.
+ */
 class Clair {
   public:
     Clair();
     void setup();
     void addSample();
     bool isMessageDue(int datarate);
+    /**
+     * Returns the length of the encoded message
+     */
     uint8_t encodeMessage(uint8_t *messageBuffer, uint16_t messageBufferSize);
     ostime_t getNextSampleTick(int datarate);
 
