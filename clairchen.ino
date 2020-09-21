@@ -26,17 +26,20 @@ void setup() {
 
   clair.setup();  
 
-#if 0
-  resumeConnection();
-#endif
-
   os_init();
 
   LMIC_reset();
-  LMIC_setDrTxpow(DR_SF7B, 14);
-  clair.setCurrentDatarate(LMIC.datarate);
-  joined = false;
+
+#if 1
+  resumeConnection();
+  joined = true;
+#else
   LMIC_startJoining();
+  joined = false;
+#endif
+
+  LMIC_setDrTxpow(DR_SF8, 14);
+  clair.setCurrentDatarate(LMIC.datarate);
   
   os_setCallback(&clairjob, measureAndSendIfDue); 
 }
@@ -89,7 +92,7 @@ void onEvent (ev_t ev) {
       break;
     case EV_JOINED:
       PRINTLN(F("EV_JOINED"));
-      printAddrAndKeys();
+      PRINT_ADDRESSES_AND_KEYS();
       // Enable automatic data rate adjustment
       LMIC_setAdrMode(1);
       clair.setCurrentDatarate(LMIC.datarate);
@@ -152,6 +155,8 @@ void onEvent (ev_t ev) {
     */
     case EV_TXSTART:
       PRINTLN(F("EV_TXSTART"));
+      PRINT(F("channel: ")); PRINT(LMIC.txChnl);
+      PRINT(F(", datarate: ")); PRINTLN(LMIC.datarate);
       break;
     case EV_TXCANCELED:
       PRINTLN(F("EV_TXCANCELED"));
