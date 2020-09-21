@@ -1,5 +1,7 @@
 #include "clair.h"
-#include <arduino_lmic.h>
+#include "sensor.h"
+#include <Arduino.h>
+#include "debug.h"
 
 typedef struct {
   uint8_t samplingPeriodMinutes;
@@ -19,39 +21,59 @@ static transmission_config_t transmission_configs[] = {
 
 #define NROF_TRANSMISSION_CONFIGS (sizeof(transmission_configs) / sizeof(transmission_configs[0]))
 
-Clair::Clair() {
+Clair::Clair(Sensor *sensorArg) {
+  sensor = sensorArg;
+  secondsSinceLastSample = 0;
   numberOfSamplesInBuffer = 0;
 }
 
 void Clair::setup() {
-  scd30.begin();
+  sensor->setup();
 }
 
-void Clair::addSample() {
-  clair_sample_t newSample;
+uint16_t Clair::getCO2Concentration() {
+  clair_sample_t sample;
+  sample = sensor->sampleMeasurements();
 
-  if (! numberOfSamplesInBuffer < CLAIR_MAX_NROF_SAMPLES_PER_MESSAGE) return;
+  PRINT(F("sample: "));
+  PRINT(F("CO2: "));
+  PRINT(sample.co2ppm);
+  PRINT(F(" ppm, temperature: "));
+  PRINT(sample.temperature);
+  PRINT(F(" °C, humidity: "));
+  PRINT(sample.humidity);
+  PRINTLN(F(" %"));
 
-  tickLastSample = os_getTime();
+  secondsSinceLastSample += CLAIR_MEASURING_PERIOD_SECS;
+  if (secondsSinceLastSample >= transmission_configs[currentDatarate].samplingPeriodMinutes * 60) {
+    PRINTLN(F("adding sample to message buffer"));
+    if (numberOfSamplesInBuffer == transmission_configs[currentDatarate].samplesPerMessage) {
+      PRINTLN(F("message overdue, discarding oldest sample"));
+      for (int i = 0; i < numberOfSamplesInBuffer - 1; i++) {
+        sampleBuffer[i] = sampleBuffer[i + 1];
+      }
+      numberOfSamplesInBuffer -= 1;
+    }
+    sampleBuffer[numberOfSamplesInBuffer] = sample;
+    numberOfSamplesInBuffer += 1;
+    PRINT(F("number of samples in buffer: "));
+    PRINTLN(numberOfSamplesInBuffer);
 
-  newSample.co2ppm = scd30.getCO2();
-  newSample.temperature = scd30.getTemperature();
-  newSample.humidity = scd30.getHumidity();
+    secondsSinceLastSample = 0;
+  }
 
-  sampleBuffer[numberOfSamplesInBuffer] = newSample;
-  numberOfSamplesInBuffer += 1;
+  return sample.co2ppm;
 }
 
-bool Clair::isMessageDue(int datarate) {
-  if (datarate < 0 || datarate > NROF_TRANSMISSION_CONFIGS) return false;
-
+void Clair::setCurrentDatarate(int datarate) {
   currentDatarate = datarate;
-  return numberOfSamplesInBuffer >= transmission_configs[datarate].samplesPerMessage;
+  PRINT(F("current datarate: "));
+  PRINTLN(currentDatarate);
 }
 
-ostime_t Clair::getNextSampleTick(int datarate) {
-  uint32_t currentSamplingPeriodMinutes = transmission_configs[datarate].samplingPeriodMinutes;
-  return tickLastSample + (ostime_t) (1000 * 60 * currentSamplingPeriodMinutes);
+bool Clair::isMessageDue() {
+  if (currentDatarate < 0 || currentDatarate > NROF_TRANSMISSION_CONFIGS) return false;
+  return numberOfSamplesInBuffer >= transmission_configs[currentDatarate].samplesPerMessage;
 }
 
 static void encodeSample(clair_sample_t sample, uint8_t *messageBuffer) {
@@ -69,7 +91,7 @@ uint8_t Clair::encodeMessage(uint8_t *messageBuffer, uint16_t messageBufferSize)
   uint8_t messageLength = 1;
   uint8_t *bufferPosition = messageBuffer;
 
-  if (! isMessageDue(currentDatarate)) return 0;
+  if (!isMessageDue()) return 0;
 
   // encode header
   *bufferPosition = 0;

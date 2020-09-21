@@ -3,92 +3,58 @@
 // ARDUINO_LMIC_PROJECT_CONFIG_H=my_project_config.h
 // otherwise the lmic_project_config.h from the LMIC library folder will be used
 #ifndef ARDUINO_LMIC_PROJECT_CONFIG_H
-# define ARDUINO_LMIC_PROJECT_CONFIG_H /home/jan/Code/ClAir/clairchen/project_config/lmic_project_config.h
+# define ARDUINO_LMIC_PROJECT_CONFIG_H /home/jan/Code/ClAir/clairchen/lmic_config.h
 #endif
 
-#include <lmic.h>
+#include <arduino_lmic.h>
+#include "scd30-sensor.h"
 #include "clair.h"
+#include "debug-display.h"
 #include "things_network.h"
-
-#define DEBUG 1 // enable (1) / disable (0) Serial prints
-
-#if DEBUG
-
-#define PRINT_INIT() do { \
-    while (!Serial); \
-    Serial.begin(9600); \
-    Serial.println(F("Let's clean some air!")); \
-  } while (0)
-#define PRINT(ARG) Serial.print(ARG)
-#define PRINTLN(ARG) Serial.println(ARG)
-#define PRINT_RECEIVED_MSG() do { \
-    PRINT(F("  Received downlink message with ")); \
-    PRINT(LMIC.dataLen); \
-    PRINTLN(F(" bytes of payload")); \
-    PRINT(F("  RSSI [dBm]: ")); \
-    PRINTLN(LMIC.rssi); \
-    PRINT(F("  SNR [dB]: ")); \
-    PRINTLN(LMIC.snr / 4); \
-    u1_t bPort = 0; \
-    if (LMIC.txrxFlags & TXRX_PORT) { \
-      bPort = LMIC.frame[LMIC.dataBeg - 1]; \
-      PRINT(F("  Received message on port ")); \
-      PRINTLN(bPort); \
-    } \
-    if (LMIC.txrxFlags & TXRX_ACK) { \
-      PRINTLN(F("  Received ack")); \
-    } \
-  } while (0)
-#define PRINT_FLUSH() Serial.flush()
-
-#else // DEBUG
-
-#define PRINT_INIT() do {} while (0)
-#define PRINT(ARG) do {} while (0)
-#define PRINTLN(ARG) do {} while (0)
-#define PRINT_RECEIVED_MSG() do {} while (0)
-#define PRINT_FLUSH() do {} while (0)
-
-#endif // DEBUG
+#include "debug.h"
 
 static osjob_t clairjob;
-static Clair clair;
+static Scd30Sensor sensor;
+static Clair clair(&sensor);
+static DebugDisplay display;
 static int currentDatarate;
+static ostime_t tickLastSample;
+static bool joined;
 
 void setup() {
   PRINT_INIT();
 
-  clair.setup();
+  clair.setup();  
 
-#if CONN_RESUME
+#if 0
   resumeConnection();
 #endif
 
-  LMIC_reset();
-  LMIC_setDrTxpow(DR_SF12, 14);
-  currentDatarate = LMIC.datarate;
-  
   os_init();
 
-  // start first measurement
-  measureAndSendIfDue(&clairjob);
+  LMIC_reset();
+  LMIC_setDrTxpow(DR_SF7B, 14);
+  clair.setCurrentDatarate(LMIC.datarate);
+  joined = false;
+  LMIC_startJoining();
+  
+  os_setCallback(&clairjob, measureAndSendIfDue); 
 }
 
 void loop() {
   os_runloop_once();
 }
 
-static void scheduleNextMeasurement() {
-  os_setTimedCallback(&clairjob, clair.getNextSampleTick(currentDatarate), measureAndSendIfDue);
-}
-
 static void measureAndSendIfDue(osjob_t* job) {
-  clair.addSample();
+  uint16_t currentCO2Concentration = clair.getCO2Concentration();
+  display.displayCurrentCO2Concentration(currentCO2Concentration);
 
-  if (clair.isMessageDue(currentDatarate)) {
+  if (joined && clair.isMessageDue()) {
     uint8_t messageBuffer[CLAIR_MAX_MESSAGE_SIZE];
     uint8_t messageLength;
     lmic_tx_error_t error;
+
+    PRINTLN("encoding message");
 
     messageLength = clair.encodeMessage(messageBuffer, CLAIR_MAX_MESSAGE_SIZE);
 
@@ -97,9 +63,9 @@ static void measureAndSendIfDue(osjob_t* job) {
       // TODO
     }
     // next measurement will be scheduled on EV_TXCOMPLETE
-  } else {
-    scheduleNextMeasurement();
   }
+
+  os_setTimedCallback(&clairjob, os_getTime() + ms2osticks(1000L * CLAIR_MEASURING_PERIOD_SECS), measureAndSendIfDue);
 }
 
 void onEvent (ev_t ev) {
@@ -126,6 +92,8 @@ void onEvent (ev_t ev) {
       printAddrAndKeys();
       // Enable automatic data rate adjustment
       LMIC_setAdrMode(1);
+      clair.setCurrentDatarate(LMIC.datarate);
+      joined = true;
       break;
     /*
       || This event is defined but not used in the code. No
@@ -155,9 +123,8 @@ void onEvent (ev_t ev) {
       PRINTLN(LMIC.seqnoUp);
       PRINT("  Downlink Sequence Counter: ");
       PRINTLN(LMIC.seqnoDn);
-
-      currentDatarate = LMIC.datarate;
-      scheduleNextMeasurement();
+      
+      clair.setCurrentDatarate(LMIC.datarate);
       break;
     case EV_LOST_TSYNC:
       PRINTLN(F("EV_LOST_TSYNC"));
