@@ -66,9 +66,18 @@ uint16_t Clair::getCO2Concentration() {
 }
 
 void Clair::setCurrentDatarate(int datarate) {
+  transmission_config_t currentTransmissionConfig = transmission_configs[datarate];
+
   currentDatarate = datarate;
+
   PRINT(F("current datarate: "));
   PRINTLN(currentDatarate);
+
+  PRINT(F("current sampling period [min]: ")); PRINTLN(currentTransmissionConfig.samplingPeriodMinutes);
+  PRINT(F("current # of samples in message: ")); PRINTLN(currentTransmissionConfig.samplesPerMessage);
+
+  // make sure next measurement is first sample
+  secondsSinceLastSample = currentTransmissionConfig.samplingPeriodMinutes * 60;
 }
 
 bool Clair::isMessageDue() {
