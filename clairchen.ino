@@ -65,7 +65,6 @@ static void measureAndSendIfDue(osjob_t* job) {
     if (error != 0) {
       // TODO
     }
-    // next measurement will be scheduled on EV_TXCOMPLETE
   }
 
   os_setTimedCallback(&clairjob, os_getTime() + ms2osticks(1000L * CLAIR_MEASURING_PERIOD_SECS), measureAndSendIfDue);
