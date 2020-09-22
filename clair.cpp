@@ -70,7 +70,8 @@ void Clair::setCurrentDatarate(int datarate) {
   currentDatarate = datarate;
 
   PRINT(F("current datarate: "));
-  PRINTLN(currentDatarate);
+  PRINT_DATARATE(currentDatarate);
+  PRINTLN("");
 
   transmission_config_t currentTransmissionConfig = transmission_configs[currentDatarate];
   PRINT(F("current sampling period [min]: ")); PRINTLN(currentTransmissionConfig.samplingPeriodMinutes);

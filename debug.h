@@ -23,6 +23,41 @@
 
 #define PRINTLN(ARG) Serial.println(ARG)
 
+/* According to DR enums in lmic/lorabase_X.h */
+#define PRINT_DATARATE(ARG) do { \
+  switch (ARG) { \
+    case 0: \
+      PRINT("DR_SF12"); \
+      break; \
+    case 1: \
+      PRINT("DR_SF11"); \
+      break; \
+    case 2: \
+      PRINT("DR_SF10"); \
+      break; \
+    case 3: \
+      PRINT("DR_SF9"); \
+      break; \
+    case 4: \
+      PRINT("DR_SF8"); \
+      break; \
+    case 5: \
+      PRINT("DR_SF7"); \
+      break; \
+    case 6: \
+      PRINT("DR_SF7B"); \
+      break; \
+    case 7: \
+      PRINT("DR_FSK"); \
+      break; \
+    case 8: \
+      PRINT("DR_NONE"); \
+      break; \
+    default: \
+      PRINT("INVALID DATARATE"); \
+  } \
+} while (0)
+
 #define PRINT_RECEIVED_MSG() do { \
     PRINT(F("  Received downlink message with ")); \
     PRINT(LMIC.dataLen); \
@@ -71,6 +106,7 @@
 #define PRINT_HEX(ARG) do {} while (0)
 #define PRINTLN(ARG) do {} while (0)
 #define PRINT_RECEIVED_MSG() do {} while (0)
+#define PRINT_DATARATE(ARG) do {} while (0)
 #define PRINT_ADDRESSES_AND_KEYS() do {} while (0)
 
 #endif // DEBUG
