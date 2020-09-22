@@ -146,8 +146,8 @@ uint8_t Clair::encodeMessage(uint8_t *messageBuffer, uint16_t messageBufferSize)
   // encode header
   uint8_t *bufferPosition = messageBuffer;
   *bufferPosition = 0;
-  *bufferPosition |= CLAIR_PROTOCOL_VERSION << 5; // protocol version (3 bits)
-  *bufferPosition |= CLAIR_MESSAGE_ID_SAMPLE_LIST << 3; // message identifier (2 bits)
+  *bufferPosition |= CLAIR_PROTOCOL_VERSION << 6; // protocol version (2 bits)
+  *bufferPosition |= CLAIR_MESSAGE_ID_SAMPLE_LIST << 3; // message identifier (3 bits)
   // NOTE: to use all bits of the message header to full capacity we transmit the number of samples - 1!
   *bufferPosition |= transmission_configs[currentDatarate].samplesPerMessage - 1; // message header (3 bits)
   bufferPosition += 1;
