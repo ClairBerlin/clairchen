@@ -50,9 +50,17 @@ class Clair {
 
   private:
     Sensor *sensor;
+
+    clair_sample_t minuteBuffer[60 / CLAIR_MEASURING_PERIOD_SECS];
+    uint8_t indexOfNextSampleInMinuteBuffer;
+
+    void addSampleToMinuteBuffer(clair_sample_t sample);
+    clair_sample_t getAverageSampleOfLastMinute();
+
     clair_sample_t sampleBuffer[CLAIR_MAX_NROF_SAMPLES_PER_MESSAGE];
     uint16_t secondsSinceLastSample;
     uint8_t numberOfSamplesInBuffer;
+
     int currentDatarate;
 };
 
