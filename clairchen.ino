@@ -7,9 +7,9 @@
 #endif
 
 #include <arduino_lmic.h>
-#include "scd30-sensor.h"
+#include "scd30_sensor.h"
 #include "clair.h"
-#include "debug-display.h"
+#include "debug_display.h"
 #include "things_network.h"
 #include "debug.h"
 

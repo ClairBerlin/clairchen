@@ -1,4 +1,4 @@
-#include "scd30-sensor.h"
+#include "scd30_sensor.h"
 #include <Wire.h>
 #include <Arduino.h>
 #include <SparkFun_SCD30_Arduino_Library.h>

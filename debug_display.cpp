@@ -1,4 +1,4 @@
-#include "debug-display.h"
+#include "debug_display.h"
 #include "debug.h"
 
 void DebugDisplay::displayCurrentCO2Concentration(uint16_t co2Concentration) {
