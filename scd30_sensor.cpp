@@ -4,7 +4,6 @@
 #include <SparkFun_SCD30_Arduino_Library.h>
 
 void Scd30Sensor::setup() {
-  Wire.begin();
   scd30.begin();
 }
 

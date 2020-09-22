@@ -26,6 +26,7 @@ void setup() {
 
   PRINT_INIT();
 
+  Wire.begin();
   clair.setup();  
   display.setup();
 

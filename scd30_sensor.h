@@ -6,7 +6,11 @@
 
 class Scd30Sensor: public Sensor {
   public:
+    /**
+     * Wire.begin() must be called before calling Scd30Sensor::setup()
+     */
     void setup() override;
+
     clair_sample_t sampleMeasurements() override;
     
   private:

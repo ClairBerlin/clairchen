@@ -22,6 +22,8 @@ class Clair {
 
     /**
      * To be called in the Arduino setup hook.
+     *
+     * If an I2C/TWI sensor is used, Wire.begin() must be called before.
      */
     void setup();
 
