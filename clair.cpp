@@ -107,15 +107,11 @@ int16_t Clair::getCO2Concentration() {
   return static_cast<int16_t>(sample.co2ppm);
 }
 
-#define CHECK_DATARATE(DATARATE) do { \
-  if (DATARATE < 0 || DATARATE > NROF_TRANSMISSION_CONFIGS) { \
-    PRINT(F("WARNING: invalid datarate: ")); PRINTLN(DATARATE); \
-    DATARATE = 0; \
-  } \
-} while (0)
-
 void Clair::setCurrentDatarate(int datarate) {
-  CHECK_DATARATE(datarate);
+  if (datarate < 0 || datarate > NROF_TRANSMISSION_CONFIGS) {
+    PRINT(F("WARNING: invalid datarate: ")); PRINTLN(datarate);
+    datarate = 0;
+  }
 
   currentDatarate = datarate;
 
