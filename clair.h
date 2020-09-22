@@ -18,21 +18,28 @@
  */
 class Clair {
   public:
+    /**
+     * Constructor
+     */
     Clair(Sensor *sensor);
 
     /**
-     * To be called in the Arduino setup hook.
+     * To be called in the Arduino setup hook
      *
      * If an I2C/TWI sensor is used, Wire.begin() must be called before.
+     *
+     * Returns false if setup fails, true otherwise.
      */
-    void setup();
+    bool setup();
 
     /**
-     * Get CO2 concentration in ppm.
+     * Get CO2 concentration in ppm
      *
-     * Must be called once per CLAIR_MEASURING_PERIOD_SECS
+     * Must be called once per CLAIR_MEASURING_PERIOD_SECS.
+     *
+     * Returns a negative value if the measurement failed.
      */
-    uint16_t getCO2Concentration();
+    int16_t getCO2Concentration();
 
     /**
      * Set the current datarate which determines the transmission rate.
@@ -41,6 +48,14 @@ class Clair {
      */
     void setCurrentDatarate(int datarate);
 
+    /**
+     * Returns whether a message is due
+     *
+     * Should be called after calling getCO2Concentration().
+     * If a message is due, encodeMessage() should be called and the message be sent.
+     * If encodeMessage() is not called even though a message is due the oldest 
+     * sample is discarded once a new sample is added to the message buffer.
+     */
     bool isMessageDue();
 
     /**

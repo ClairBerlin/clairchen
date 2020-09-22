@@ -11,8 +11,20 @@ typedef struct {
 
 class Sensor {
   public:
-    virtual void setup() = 0;
+    /**
+     * Returns false if setup fails, true otherwise.
+     */
+    virtual bool setup() = 0;
+
+    /**
+     * Sample measurements.
+     */
     virtual clair_sample_t sampleMeasurements() = 0;
+
+    /**
+     * Return true if communication to the sensor failed.
+     */
+    virtual bool measurementFailed() = 0;
 };
 
 #endif /* SENSOR_H */

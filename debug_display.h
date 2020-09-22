@@ -6,6 +6,7 @@
 class DebugDisplay: public Display {
   public:
     void displayCurrentCO2Concentration(uint16_t co2Concentration) override;
+    void displayError(ErrorCode errorCode) override;
 };
 
 #endif /* DEBUG_DISPLAY_H */

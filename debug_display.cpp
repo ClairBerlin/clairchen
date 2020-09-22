@@ -23,3 +23,9 @@ void DebugDisplay::displayCurrentCO2Concentration(uint16_t co2Concentration) {
   PRINT(co2Concentration);
   PRINTLN(F(" ppm)"));
 }
+
+void DebugDisplay::displayError(ErrorCode errorCode) {
+  PRINT(F("ERROR: 0x"));
+  PRINT_HEX(static_cast<int>(errorCode));
+  PRINTLN("");
+}

@@ -30,8 +30,8 @@ Clair::Clair(Sensor *sensorArg) {
   indexOfNextSampleInMinuteBuffer = 0;
 }
 
-void Clair::setup() {
-  sensor->setup();
+bool Clair::setup() {
+  return sensor->setup();
 }
 
 #define NROF_SAMPLES_IN_MINUTE_BUFFER (sizeof(minuteBuffer) / sizeof(minuteBuffer[0]))
@@ -70,9 +70,10 @@ clair_sample_t Clair::getAverageSampleOfLastMinute() {
   PRINTLN(F(" %")); \
 } while (0)
 
-uint16_t Clair::getCO2Concentration() {
-  clair_sample_t sample;
-  sample = sensor->sampleMeasurements();
+int16_t Clair::getCO2Concentration() {
+  if (sensor->measurementFailed()) return -1;
+
+  clair_sample_t sample = sensor->sampleMeasurements();
 
   PRINT(F("sample: "));
   PRINT_SAMPLE(sample);
@@ -103,7 +104,7 @@ uint16_t Clair::getCO2Concentration() {
     secondsSinceLastSample = 0;
   }
 
-  return sample.co2ppm;
+  return static_cast<int16_t>(sample.co2ppm);
 }
 
 #define CHECK_DATARATE(DATARATE) do { \

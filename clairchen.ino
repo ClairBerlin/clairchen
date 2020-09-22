@@ -11,13 +11,20 @@
 #include "clair.h"
 #include "blinking_display.h"
 #include "things_network.h"
+#include "error_code.h"
 #include "debug.h"
 
+static ErrorCode errorCode;
 static osjob_t clairjob;
 static Scd30Sensor sensor;
 static Clair clair(&sensor);
 static BlinkingDisplay display;
 static bool joined;
+
+#define ERROR(ERROR_CODE) do { \
+  errorCode = ERROR_CODE; \
+  display.displayError(ERROR_CODE); \
+} while (0)
 
 void setup() {
   os_init();
@@ -25,8 +32,10 @@ void setup() {
   PRINT_INIT();
 
   Wire.begin();
-  clair.setup();  
   display.setup();
+  if (!clair.setup()) {
+    ERROR(ErrorCode::CLAIR_SETUP_FAILED);
+  }
 
   LMIC_reset();
 
@@ -50,7 +59,14 @@ void loop() {
 }
 
 static void measureAndSendIfDue(osjob_t* job) {
-  uint16_t currentCO2Concentration = clair.getCO2Concentration();
+  if (errorCode != ErrorCode::NO_ERROR) return;
+
+  int16_t currentCO2Concentration = clair.getCO2Concentration();
+  if (currentCO2Concentration < 0) {
+    ERROR(ErrorCode::CLAIR_MEASUREMENT_FAILED);
+    return;
+  }
+
   display.displayCurrentCO2Concentration(currentCO2Concentration);
 
   if (joined && clair.isMessageDue()) {
@@ -64,7 +80,7 @@ static void measureAndSendIfDue(osjob_t* job) {
 
     error = LMIC_setTxData2(1, messageBuffer, messageLength, 0);
     if (error != 0) {
-      // TODO
+      ERROR(ErrorCode::TX_FAILED);
     }
   }
 

@@ -1,6 +1,7 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "error_code.h"
 #include <stdint.h>
 
 #define DISPLAY_THRESHOLD_GOOD      450
@@ -15,6 +16,7 @@ class Display {
     virtual void setup() { };
 
     virtual void displayCurrentCO2Concentration(uint16_t co2Concentration) = 0;
+    virtual void displayError(ErrorCode errorCode) = 0;
 
     inline CO2AirQuality concentrationToAirQuality(uint16_t co2Concentration) {
       if (co2Concentration < DISPLAY_THRESHOLD_GOOD) return CO2AirQuality::veryGood;

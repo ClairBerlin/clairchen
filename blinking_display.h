@@ -13,6 +13,7 @@ class BlinkingDisplay: public DebugDisplay {
   public:
     void setup() override;
     void displayCurrentCO2Concentration(uint16_t co2Concentration) override;
+    void displayError(ErrorCode errorCode) override;
 };
 
 #endif /* BLINKING_DISPLAY_H */
