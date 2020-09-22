@@ -81,10 +81,8 @@ void Clair::setCurrentDatarate(int datarate) {
   PRINT(F("current datarate: "));
   PRINT_DATARATE(currentDatarate);
   PRINTLN("");
-
-  transmission_config_t currentTransmissionConfig = transmission_configs[currentDatarate];
-  PRINT(F("current sampling period [min]: ")); PRINTLN(currentTransmissionConfig.samplingPeriodMinutes);
-  PRINT(F("current # of samples in message: ")); PRINTLN(currentTransmissionConfig.samplesPerMessage);
+  PRINT(F("current sampling period [min]: ")); PRINTLN(transmission_configs[currentDatarate].samplingPeriodMinutes);
+  PRINT(F("current # of samples in message: ")); PRINTLN(transmission_configs[currentDatarate].samplesPerMessage);
 }
 
 bool Clair::isMessageDue() {
