@@ -33,6 +33,7 @@ void setup() {
 #if 1
   resumeConnection();
   joined = true;
+  LMIC_setAdrMode(1);
 #else
   LMIC_startJoining();
   joined = false;
