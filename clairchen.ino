@@ -40,7 +40,7 @@ void setup() {
   joined = false;
 #endif
 
-  LMIC_setDrTxpow(DR_SF7, 14);
+  LMIC_setDrTxpow(DR_SF9, 14);
   clair.setCurrentDatarate(LMIC.datarate);
   
   os_setCallback(&clairjob, measureAndSendIfDue); 
