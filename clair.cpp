@@ -66,7 +66,16 @@ uint16_t Clair::getCO2Concentration() {
   return sample.co2ppm;
 }
 
+#define CHECK_DATARATE(DATARATE) do { \
+  if (DATARATE < 0 || DATARATE > NROF_TRANSMISSION_CONFIGS) { \
+    PRINT(F("WARNING: invalid datarate: ")); PRINTLN(DATARATE); \
+    DATARATE = 0; \
+  } \
+} while (0)
+
 void Clair::setCurrentDatarate(int datarate) {
+  CHECK_DATARATE(datarate);
+
   currentDatarate = datarate;
 
   PRINT(F("current datarate: "));
@@ -79,7 +88,6 @@ void Clair::setCurrentDatarate(int datarate) {
 }
 
 bool Clair::isMessageDue() {
-  if (currentDatarate < 0 || currentDatarate > NROF_TRANSMISSION_CONFIGS) return false;
   return numberOfSamplesInBuffer >= transmission_configs[currentDatarate].samplesPerMessage;
 }
 
