@@ -63,10 +63,11 @@ static void setupEu868Channels() {
 
 void resumeConnection() {
   // Resume an already established connection - from a previous OTAA JOIN.
-  uint8_t appskey[sizeof(APPSKEY)];
-  uint8_t nwkskey[sizeof(NWKSKEY)];
 
+  uint8_t appskey[sizeof(APPSKEY)];
   memcpy_P(appskey, APPSKEY, sizeof(APPSKEY));
+
+  uint8_t nwkskey[sizeof(NWKSKEY)];
   memcpy_P(nwkskey, NWKSKEY, sizeof(NWKSKEY));
 
   LMIC_setSession (0x13, DEVADDR, nwkskey, appskey);

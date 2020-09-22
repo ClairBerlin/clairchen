@@ -19,11 +19,7 @@
 
 #define PRINT(ARG) Serial.print(ARG)
 
-#define PRINT_HEX(ARG) do { \
-  uint8_t val = ARG & 0xFF; \
-  if (val < 16) Serial.print('0'); \
-  Serial.print(val, HEX); \
-} while (0)
+#define PRINT_HEX(ARG) Serial.print(ARG, HEX)
 
 #define PRINTLN(ARG) Serial.println(ARG)
 
@@ -49,6 +45,7 @@
 #define PRINT_KEY(KEY) do { \
   for (int i = 0; i < sizeof(KEY); i++) { \
     if (i != 0) PRINT("-"); \
+    if (KEY[i] < 16) PRINT(0); \
     PRINT_HEX(KEY[i]); \
   } \
 } while (0)

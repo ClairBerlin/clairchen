@@ -13,9 +13,10 @@ static uint16_t currentPeriod;
 static int currentValue;
 
 static void blink(osjob_t *job) {
-  ostime_t nextBlinkTick = os_getTime() + ms2osticks(currentPeriod);
   currentValue = currentValue == HIGH ? LOW : HIGH;
   digitalWrite(LED_BUILTIN, currentValue);
+
+  ostime_t nextBlinkTick = os_getTime() + ms2osticks(currentPeriod);
   os_setTimedCallback(&blinkJob, nextBlinkTick, blink);
 }
 

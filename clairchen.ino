@@ -17,8 +17,6 @@ static osjob_t clairjob;
 static Scd30Sensor sensor;
 static Clair clair(&sensor);
 static BlinkingDisplay display;
-static int currentDatarate;
-static ostime_t tickLastSample;
 static bool joined;
 
 void setup() {
