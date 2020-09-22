@@ -1,17 +1,8 @@
 #include "things_network.h"
-
-// We need to be able to compile with different options without editing source.
-// When building with a more advanced environment, set the following variable:
-// ARDUINO_LMIC_PROJECT_CONFIG_H=my_project_config.h
-// otherwise the lmic_project_config.h from the LMIC library folder will be used
-#ifndef ARDUINO_LMIC_PROJECT_CONFIG_H
-# define ARDUINO_LMIC_PROJECT_CONFIG_H /home/jan/Code/ClAir/clairchen/lmic_config.h
-#endif
-
+#include "debug.h"
 #include <arduino_lmic.h>
 #include <hal/hal.h>
 #include <Arduino.h>
-#include "debug.h"
 
 //--------------------------------------------------------------------
 //--  Board Setup for Adafruit Feather MO LoRa

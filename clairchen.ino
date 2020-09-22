@@ -1,18 +1,10 @@
-// We need to be able to compile with different options without editing source.
-// When building with a more advanced environment, set the following variable:
-// ARDUINO_LMIC_PROJECT_CONFIG_H=my_project_config.h
-// otherwise the lmic_project_config.h from the LMIC library folder will be used
-#ifndef ARDUINO_LMIC_PROJECT_CONFIG_H
-# define ARDUINO_LMIC_PROJECT_CONFIG_H /home/jan/Code/ClAir/clairchen/lmic_config.h
-#endif
-
-#include <arduino_lmic.h>
 #include "scd30_sensor.h"
 #include "clair.h"
 #include "blinking_display.h"
 #include "things_network.h"
 #include "error_code.h"
 #include "debug.h"
+#include <arduino_lmic.h>
 
 static ErrorCode errorCode;
 static osjob_t clairjob;
@@ -48,7 +40,7 @@ void setup() {
   joined = false;
 #endif
 
-  LMIC_setDrTxpow(DR_SF9, 14);
+  LMIC_setDrTxpow(DR_SF7, 14);
   clair.setCurrentDatarate(LMIC.datarate);
   
   os_setCallback(&clairjob, measureAndSendIfDue); 
