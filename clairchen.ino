@@ -9,24 +9,25 @@
 #include <arduino_lmic.h>
 #include "scd30_sensor.h"
 #include "clair.h"
-#include "debug_display.h"
+#include "blinking_display.h"
 #include "things_network.h"
 #include "debug.h"
 
 static osjob_t clairjob;
 static Scd30Sensor sensor;
 static Clair clair(&sensor);
-static DebugDisplay display;
+static BlinkingDisplay display;
 static int currentDatarate;
 static ostime_t tickLastSample;
 static bool joined;
 
 void setup() {
+  os_init();
+
   PRINT_INIT();
 
   clair.setup();  
-
-  os_init();
+  display.setup();
 
   LMIC_reset();
 

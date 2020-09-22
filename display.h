@@ -12,6 +12,8 @@ enum class CO2AirQuality { veryGood, good, fair, bad, critical };
 
 class Display {
   public:
+    virtual void setup() { };
+
     virtual void displayCurrentCO2Concentration(uint16_t co2Concentration) = 0;
 
     inline CO2AirQuality concentrationToAirQuality(uint16_t co2Concentration) {
