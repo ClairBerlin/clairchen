@@ -23,6 +23,7 @@ static transmission_config_t transmission_configs[] = {
 
 Clair::Clair(Sensor *sensorArg) {
   sensor = sensorArg;
+  currentDatarate = 0; // SF12
   secondsSinceLastSample = 0;
   numberOfSamplesInBuffer = 0;
 }
@@ -75,9 +76,6 @@ void Clair::setCurrentDatarate(int datarate) {
 
   PRINT(F("current sampling period [min]: ")); PRINTLN(currentTransmissionConfig.samplingPeriodMinutes);
   PRINT(F("current # of samples in message: ")); PRINTLN(currentTransmissionConfig.samplesPerMessage);
-
-  // make sure next measurement is first sample
-  secondsSinceLastSample = currentTransmissionConfig.samplingPeriodMinutes * 60;
 }
 
 bool Clair::isMessageDue() {
