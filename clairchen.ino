@@ -14,9 +14,9 @@ static BlinkingDisplay display;
 static bool joined;
 
 #define ERROR(ERROR_CODE) do { \
-  errorCode = ERROR_CODE; \
-  display.displayError(ERROR_CODE); \
-} while (0)
+    errorCode = ERROR_CODE; \
+    display.displayError(ERROR_CODE); \
+  } while (0)
 
 void setup() {
   os_init();
@@ -33,17 +33,17 @@ void setup() {
 
 #if 1
   resumeConnection();
+  LMIC_setDrTxpow(DR_SF9, 14);
   joined = true;
-  LMIC_setAdrMode(1);
+  // LMIC_setAdrMode(1);
 #else
   LMIC_startJoining();
   joined = false;
 #endif
 
-  LMIC_setDrTxpow(DR_SF9, 14);
   clair.setCurrentDatarate(LMIC.datarate);
-  
-  os_setCallback(&clairjob, measureAndSendIfDue); 
+
+  os_setCallback(&clairjob, measureAndSendIfDue);
 }
 
 void loop() {
@@ -134,7 +134,7 @@ void onEvent (ev_t ev) {
       PRINTLN(LMIC.seqnoUp);
       PRINT("  Downlink Sequence Counter: ");
       PRINTLN(LMIC.seqnoDn);
-      
+
       clair.setCurrentDatarate(LMIC.datarate);
       break;
     case EV_LOST_TSYNC:
