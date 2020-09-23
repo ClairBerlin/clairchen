@@ -19,7 +19,7 @@ class Scd30Sensor: public Sensor {
     
   private:
     SCD30 scd30;
-    bool error;
+    int errorCounter;
 };
 
 #endif /* SCD30_SENSOR_H */
