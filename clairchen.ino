@@ -33,7 +33,7 @@ void setup() {
 
 #if 1
   resumeConnection();
-  LMIC_setDrTxpow(DR_SF9, 14);
+  LMIC_setDrTxpow(DR_SF8, 14);
   joined = true;
   // LMIC_setAdrMode(1);
 #else
