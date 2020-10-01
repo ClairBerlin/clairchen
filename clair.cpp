@@ -1,7 +1,7 @@
 #include "clair.h"
 #include "sensor.h"
-#include <Arduino.h>
 #include "debug.h"
+#include <algorithm>
 
 typedef struct {
   uint8_t samplingPeriodMinutes;
@@ -126,12 +126,32 @@ bool Clair::isMessageDue() {
   return numberOfSamplesInBuffer >= transmission_configs[currentDatarate].samplesPerMessage;
 }
 
+static uint8_t encodeCO2ppmByte(uint16_t co2ppm) {
+  co2ppm = std::min(co2ppm, static_cast<uint16_t>(5100));
+  return (co2ppm + 10) / 20; // apply proper rounding
+}
+
+static uint8_t encodeTemperatureByte(float temperature) {
+  temperature = std::max(temperature, static_cast<float>(.0));
+  temperature = std::min(temperature, static_cast<float>(31.0));
+  uint8_t quantizedTemperature = ((uint8_t) (temperature + 0.5)) & 0x1F;
+  return quantizedTemperature;
+}
+
+static uint8_t encodeHumidityByte(float humidity) {
+  humidity = std::max(humidity, static_cast<float>(10.0));
+  humidity = std::min(humidity, static_cast<float>(80.0));
+  uint8_t quantizedHumidity = (uint8_t) (humidity + 5) / 10; // quantize to 10 °K steps
+  quantizedHumidity -= 1; // start at 0
+  return quantizedHumidity & 0x7;
+}
+
 static void encodeSample(clair_sample_t sample, uint8_t *messageBuffer) {
-  messageBuffer[0] = (sample.co2ppm + 10) / 20;
+  messageBuffer[0] = encodeCO2ppmByte(sample.co2ppm);
 
   messageBuffer[1] = 0;
-  messageBuffer[1] |= (((uint8_t) (sample.temperature + 0.5)) & 0x1F) << 3; // 5 bits
-  messageBuffer[1] |= ((uint8_t) (sample.humidity + 5) / 10) & 0x7; // 3 bits
+  messageBuffer[1] |= encodeTemperatureByte(sample.temperature) << 3; // 5 bits
+  messageBuffer[1] |= encodeHumidityByte(sample.humidity); // 3 bits
 }
 
 #define CLAIR_PROTOCOL_VERSION 0
