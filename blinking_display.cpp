@@ -22,6 +22,8 @@ static bool errorHasOccurred() {
 }
 
 static void blink(osjob_t *job) {
+  (void) (job); // unused
+
   currentValue = currentValue == HIGH ? LOW : HIGH;
   digitalWrite(LED_BUILTIN, currentValue);
 

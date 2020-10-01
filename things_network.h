@@ -3,4 +3,4 @@
 
 void resumeConnection();
 
-#endif THINGS_NETWORK_H
+#endif /* THINGS_NETWORK_H */

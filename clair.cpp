@@ -46,7 +46,7 @@ clair_sample_t Clair::getAverageSampleOfLastMinute() {
   float sumOfTemperatures = 0;
   float sumOfHumidities = 0;
 
-  for (int i = 0; i < NROF_SAMPLES_IN_MINUTE_BUFFER; i++) {
+  for (uint16_t i = 0; i < NROF_SAMPLES_IN_MINUTE_BUFFER; i++) {
     sumOfCo2ppms += minuteBuffer[i].co2ppm;
     sumOfTemperatures += minuteBuffer[i].temperature;
     sumOfHumidities += minuteBuffer[i].humidity;
@@ -61,14 +61,14 @@ clair_sample_t Clair::getAverageSampleOfLastMinute() {
 }
 
 #define PRINT_SAMPLE(SAMPLE) do { \
-  PRINT(F("CO2: ")); \
-  PRINT(SAMPLE.co2ppm); \
-  PRINT(F(" ppm, temperature: ")); \
-  PRINT(SAMPLE.temperature); \
-  PRINT(F(" °C, humidity: ")); \
-  PRINT(SAMPLE.humidity); \
-  PRINTLN(F(" %")); \
-} while (0)
+    PRINT(F("CO2: ")); \
+    PRINT(SAMPLE.co2ppm); \
+    PRINT(F(" ppm, temperature: ")); \
+    PRINT(SAMPLE.temperature); \
+    PRINT(F(" °C, humidity: ")); \
+    PRINT(SAMPLE.humidity); \
+    PRINTLN(F(" %")); \
+  } while (0)
 
 int16_t Clair::getCO2Concentration() {
   if (sensor->measurementFailed()) return -1;
@@ -108,7 +108,7 @@ int16_t Clair::getCO2Concentration() {
 }
 
 void Clair::setCurrentDatarate(int datarate) {
-  if (datarate < 0 || datarate > NROF_TRANSMISSION_CONFIGS) {
+  if (datarate < 0 || datarate > (int) NROF_TRANSMISSION_CONFIGS) {
     PRINT(F("WARNING: invalid datarate: ")); PRINTLN(datarate);
     datarate = 0;
   }
@@ -139,6 +139,7 @@ static void encodeSample(clair_sample_t sample, uint8_t *messageBuffer) {
 
 uint8_t Clair::encodeMessage(uint8_t *messageBuffer, uint16_t messageBufferSize) {
   if (!isMessageDue()) return 0;
+  if (messageBufferSize < 1) return 0;
 
   // encode header
   uint8_t *bufferPosition = messageBuffer;
@@ -153,9 +154,14 @@ uint8_t Clair::encodeMessage(uint8_t *messageBuffer, uint16_t messageBufferSize)
 
   // encode samples
   for (int i = 0; i < numberOfSamplesInBuffer; i++) {
+    messageLength += 2;
+    if (messageLength > messageBufferSize) {
+      PRINT(F("WARNING: message buffer size too small:"));
+      PRINTLN(messageBufferSize);
+      return 0;
+    }
     encodeSample(sampleBuffer[i], bufferPosition);
     bufferPosition += 2;
-    messageLength += 2;
   }
 
   // reset sample buffer

@@ -5,6 +5,7 @@
 #include "error_code.h"
 #include "debug.h"
 #include <arduino_lmic.h>
+#include <arduino_lmic_hal_boards.h>
 
 static ErrorCode errorCode;
 static osjob_t clairjob;
@@ -19,7 +20,7 @@ static bool joined;
   } while (0)
 
 void setup() {
-  os_init();
+  os_init_ex(Arduino_LMIC::GetPinmap_ThisBoard());
 
   PRINT_INIT();
 
@@ -33,7 +34,7 @@ void setup() {
 
 #if 1
   resumeConnection();
-  LMIC_setDrTxpow(DR_SF9, 14);
+  LMIC_setDrTxpow(DR_SF11, 14);
   joined = true;
   // LMIC_setAdrMode(1);
 #else
@@ -51,6 +52,8 @@ void loop() {
 }
 
 static void measureAndSendIfDue(osjob_t* job) {
+  (void) (job); // unused
+
   if (errorCode != ErrorCode::NO_ERROR) return;
 
   int16_t currentCO2Concentration = clair.getCO2Concentration();

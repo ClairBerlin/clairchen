@@ -4,24 +4,6 @@
 #include <hal/hal.h>
 #include <Arduino.h>
 
-//--------------------------------------------------------------------
-//--  Board Setup for Adafruit Feather MO LoRa
-//--------------------------------------------------------------------
-#if defined(ARDUINO_SAMD_FEATHER_M0) || defined(ADAFRUIT_FEATHER_M0)
-// Pin mapping for Adafruit Feather M0 LoRa, etc.
-const lmic_pinmap lmic_pins = {
-  .nss = 8,
-  .rxtx = LMIC_UNUSED_PIN,
-  .rst = 4,
-  .dio = {3, 6, LMIC_UNUSED_PIN},
-  .rxtx_rx_active = 0,
-  .rssi_cal = 8,              // LBT cal for the Adafruit Feather M0 LoRa, in dB
-  // D-stepping of the silicon, so the 10Mhz SPI clock should work.
-};
-#else
-# error "Unknown target"
-#endif
-
 #include "euis.h"
 
 void os_getDevEui (u1_t* buf) {

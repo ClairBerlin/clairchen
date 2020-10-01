@@ -2,6 +2,7 @@
 #define DEBUG_H
 
 #include <Arduino.h>
+#include <stdint.h>
 
 #ifndef DEBUG
 #define DEBUG 1 // enable (1) / disable (0) Serial prints
@@ -78,7 +79,7 @@
 } while (0)
 
 #define PRINT_KEY(KEY) do { \
-  for (int i = 0; i < sizeof(KEY); i++) { \
+  for (uint8_t i = 0; i < sizeof(KEY); i++) { \
     if (i != 0) PRINT("-"); \
     if (KEY[i] < 16) PRINT(0); \
     PRINT_HEX(KEY[i]); \
