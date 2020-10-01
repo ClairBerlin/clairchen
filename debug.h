@@ -1,14 +1,14 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <Arduino.h>
-#include <stdint.h>
-
 #ifndef DEBUG
 #define DEBUG 1 // enable (1) / disable (0) Serial prints
 #endif
 
 #if DEBUG
+
+#include <Arduino.h>
+#include <stdint.h>
 
 #define PRINT_INIT() do { \
     while (!Serial); \
