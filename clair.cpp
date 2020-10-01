@@ -4,19 +4,19 @@
 #include <algorithm>
 
 typedef struct {
-  uint8_t samplingPeriodMinutes;
+  uint16_t samplingPeriodSeconds;
   uint8_t samplesPerMessage;
 } transmission_config_t;
 
 // the order of this array corresponds to the LMIC DR_XX enums
 static transmission_config_t transmission_configs[] = {
-  { .samplingPeriodMinutes = 14, .samplesPerMessage = 5 }, // SF12+
-  { .samplingPeriodMinutes = 9, .samplesPerMessage = 4 }, // SF11+
-  { .samplingPeriodMinutes = 3, .samplesPerMessage = 5 }, // SF10+
-  { .samplingPeriodMinutes = 3, .samplesPerMessage = 3 }, // SF9+
-  { .samplingPeriodMinutes = 2, .samplesPerMessage = 2 }, // SF8
-  { .samplingPeriodMinutes = 1, .samplesPerMessage = 2 }, // SF7
-  { .samplingPeriodMinutes = 1, .samplesPerMessage = 2 } // SF7/B
+  { .samplingPeriodSeconds = 855, .samplesPerMessage = 5 }, // SF12+
+  { .samplingPeriodSeconds = 534, .samplesPerMessage = 4 }, // SF11+
+  { .samplingPeriodSeconds = 214, .samplesPerMessage = 5 }, // SF10+
+  { .samplingPeriodSeconds = 178, .samplesPerMessage = 3 }, // SF9+
+  { .samplingPeriodSeconds = 134, .samplesPerMessage = 2 }, // SF8
+  { .samplingPeriodSeconds = 75, .samplesPerMessage = 2 }, // SF7
+  { .samplingPeriodSeconds = 38, .samplesPerMessage = 2 } // SF7/B
 };
 
 #define NROF_TRANSMISSION_CONFIGS (sizeof(transmission_configs) / sizeof(transmission_configs[0]))
@@ -81,7 +81,7 @@ int16_t Clair::getCO2Concentration() {
   addSampleToMinuteBuffer(sample);
   secondsSinceLastSample += CLAIR_MEASURING_PERIOD_SECS;
 
-  if (secondsSinceLastSample >= transmission_configs[currentDatarate].samplingPeriodMinutes * 60) {
+  if (secondsSinceLastSample >= transmission_configs[currentDatarate].samplingPeriodSeconds) {
     PRINTLN(F("adding average sample of last minute to message buffer"));
 
     if (numberOfSamplesInBuffer == transmission_configs[currentDatarate].samplesPerMessage) {
@@ -118,7 +118,7 @@ void Clair::setCurrentDatarate(int datarate) {
   PRINT(F("current datarate: "));
   PRINT_DATARATE(currentDatarate);
   PRINTLN("");
-  PRINT(F("current sampling period [min]: ")); PRINTLN(transmission_configs[currentDatarate].samplingPeriodMinutes);
+  PRINT(F("current sampling period [s]: ")); PRINTLN(transmission_configs[currentDatarate].samplingPeriodSeconds);
   PRINT(F("current # of samples in message: ")); PRINTLN(transmission_configs[currentDatarate].samplesPerMessage);
 }
 
